@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Election (Java + Bedrock)</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      color: #22c55e;
+      font-size: 2rem;
+    }
+    .container {
+      margin-bottom: 1rem;
+    }
+    input {
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+      background-color: #22c55e;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #16a34a;
+    }
+    .candidate-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .candidate {
+      background: #1e293b;
+      padding: 10px 20px;
+      border-radius: 10px;
+      min-width: 120px;
+    }
+    .results-box {
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: left;
+      white-space: pre-line;
+    }
+    .results-btn {
+      background-color: #3b82f6;
+    }
+    .results-btn:hover {
+      background-color: #2563eb;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>🗳 Minecraft Election (Java + Bedrock)</h1>
+
+  <div class="container">
+    <input id="playerName" type="text" placeholder="Your Minecraft name or Gamertag">
+    <input id="nomineeName" type="text" placeholder="Nominate a player">
+    <button onclick="nominate()">Nominate</button>
+  </div>
+
+  <h2>Candidates</h2>
+  <div id="candidates" class="candidate-list"></div>
+
+  <h2>Vote</h2>
+  <div id="voteButtons"></div>
+
+  <button class="results-btn" onclick="showResults()">Show Results</button>
+
+  <h2>📊 Results</h2>
+  <div id="results" class="results-box"></div>
+
+  <footer>
+    <p>Made for Minecraft Java + Bedrock players 🧱</p>
+  </footer>
+
+  <script>
+    // Store data in memory
+    const candidates = new Map();
+    const votes = new Map();
+
+    function nominate() {
+      const nominee = document.getElementById("nomineeName").value.trim();
+      if (!nominee) return alert("Enter a player name to nominate!");
+      if (candidates.has(nominee)) return alert(`${nominee} is already nominated!`);
+      candidates.set(nominee, 0);
+      document.getElementById("nomineeName").value = "";
+      renderCandidates();
+    }
+
+    function renderCandidates() {
+      const candidatesDiv = document.getElementById("candidates");
+      const voteButtonsDiv = document.getElementById("voteButtons");
+      candidatesDiv.innerHTML = "";
+      voteButtonsDiv.innerHTML = "";
+
+      candidates.forEach((_, name) => {
+        const div = document.createElement("div");
+        div.className = "candidate";
+        div.textContent = name;
+        candidatesDiv.appendChild(div);
+
+        const btn = document.createElement("button");
+        btn.textContent = `Vote for ${name}`;
+        btn.onclick = () => vote(name);
+        voteButtonsDiv.appendChild(btn);
+      });
+    }
+
+    function vote(name) {
+      const player = document.getElementById("playerName").value.trim();
+      if (!player) return alert("Enter your Minecraft name or Gamertag!");
+      if (votes.has(player)) return alert("You already voted!");
+      votes.set(player, name);
+      candidates.set(name, candidates.get(name) + 1);
+      alert(`✅ ${player} voted for ${name}!`);
+    }
+
+    function showResults() {
+      let resultText = "";
+      let highest = 0;
+      let winner = "No votes yet";
+
+      candidates.forEach((count, name) => {
+        resultText += `${name}: ${count} votes\n`;
+        if (count > highest) {
+          highest = count;
+          winner = name;
+        }
+      });
+
+      if (winner !== "No votes yet") {
+        resultText += `\n🏆 Winner: ${winner} 🏆`;
+      }
+
+      document.getElementById("results").textContent = resultText || "No candidates yet.";
+    }
+  </script>
+</body>
+</html>
