@@ -250,6 +250,8 @@
                 Login
             </button>
             <p id="loginError" class="text-red-600 text-sm mt-4 hidden font-[Inter]"></p>
+            
+            <!-- Hint for testing/demo was here, but has been removed as requested -->
         </div>
     </div>
 
@@ -289,8 +291,9 @@
             <pre id="results-content" class="text-sm font-[Press Start 2P] whitespace-pre-wrap hidden"></pre>
         </div>
 
-        <footer class="mt-12 text-xs text-gray-400 font-[Inter]">
-            <p>Powered by Firestore Real-time Data | Designed for Cloudflare Pages 🧱</p>
+        <!-- UPDATED FOOTER AND ATTRIBUTION --><footer class="mt-12 w-full max-w-lg text-gray-400 font-[Inter] text-center">
+            <p class="text-xs">Powered by Firestore Real-time Data | Designed for Cloudflare Pages 🧱</p>
+            <p class="text-xs mt-1 text-right">Made by Prashant Jaiswal</p>
         </footer>
     </div>
 
@@ -754,7 +757,7 @@
 
                 // Format: Candidate Name (Party)
                 resultText += `${item.name.toUpperCase()} (${item.party}):\n`;
-                // Format: [BAR CHART] Count (Percentage)
+                // Format: [${bar}] Count (Percentage)
                 resultText += `  [${bar}] ${count} (${percent}%)\n\n`;
             });
             
@@ -786,5 +789,3 @@
     </script>
 </body>
 </html>
-
-
