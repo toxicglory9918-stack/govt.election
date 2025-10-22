@@ -196,29 +196,30 @@
 
         .shard {
             position: absolute;
-            background: rgba(255, 255, 255, 0.9); /* More opaque white */
-            box-shadow: 0 0 8px 3px rgba(103, 232, 249, 0.6); /* Icy blue glow */
+            /* Enhanced visibility: bright white center with a strong cyan glow */
+            background: rgba(255, 255, 255, 0.95); 
+            box-shadow: 0 0 10px 4px rgba(103, 232, 249, 0.8); /* Stronger Icy blue glow */
             border-radius: 50%;
             opacity: 0;
-            animation: float 25s infinite ease-in-out alternate; /* Slightly longer animation */
+            animation: float 25s infinite ease-in-out alternate; 
         }
 
         @keyframes float {
             0% {
                 transform: translateY(0vh) translateX(0vw) rotate(0deg) scale(0.8);
-                opacity: 0.6; /* Increased opacity for better visibility */
+                opacity: 0.7; /* Increased opacity for better visibility */
             }
             30% {
                 transform: translateY(-20vh) translateX(10vw) rotate(120deg) scale(1.1);
-                opacity: 0.9; 
+                opacity: 1; 
             }
             60% {
                 transform: translateY(10vh) translateX(-15vw) rotate(240deg) scale(0.9);
-                opacity: 0.7; 
+                opacity: 0.8; 
             }
             100% {
                 transform: translateY(0vh) translateX(0vw) rotate(360deg) scale(0.8);
-                opacity: 0.6; /* Increased opacity for better visibility */
+                opacity: 0.7; /* Increased opacity for better visibility */
             }
         }
 
@@ -440,7 +441,10 @@
             const errorElement = document.getElementById("loginError");
             errorElement.textContent = message;
             errorElement.classList.remove('hidden');
-            setTimeout(() => { errorElement.classList.add('hidden'); }, 4000);
+            // This is the persistent error for offline mode, don't hide it immediately
+            if (message !== "Database connection error. Voting is disabled. (Offline Mode)") {
+                setTimeout(() => { errorElement.classList.add('hidden'); }, 4000);
+            }
         }
 
 
@@ -450,12 +454,9 @@
         async function setupFirebaseApp() {
             if (!isOnlineMode) {
                 // OFFLINE MODE: Skip Firebase initialization, but set the error message.
-                const loginError = document.getElementById("loginError");
-                loginError.textContent = "Database connection error. Voting is disabled. (Offline Mode)";
-                loginError.classList.remove('hidden');
+                setLoginError("Database connection error. Voting is disabled. (Offline Mode)");
                 document.getElementById("loginButton").disabled = true;
                 
-                // Set isAuthReady to true to allow the background animation to be called in the main loop
                 isAuthReady = true; 
                 renderCandidates();
                 setupRealtimeResults(); // Setup results in offline mode (will show 0 votes)
@@ -516,6 +517,7 @@
             
             // If offline, voting and admin are disabled
             if (!isOnlineMode) {
+                // The persistent error message should already be showing, just reinforce it.
                 return setLoginError("Voting is disabled because the database is offline.");
             }
 
@@ -628,7 +630,7 @@
             }, 2000); // Display for 2 seconds
         }
 
-        // NEW: Function to create and manage the subtle background animation
+        // Function to create and manage the subtle background animation
         function createBackgroundAnimation() {
             const container = document.getElementById('background-animation');
             const numShards = 40; // Total number of particles
@@ -842,12 +844,13 @@
 
         // --- GLOBAL INITIALIZATION ---
         
-        // 1. Start the animation unconditionally (Fixes the animation issue)
+        // 1. Start the animation unconditionally (FIXED: Moved this outside of the async setup function)
         createBackgroundAnimation(); 
 
-        // 2. Start the application setup (which now handles online/offline mode gracefully)
+        // 2. Start the application setup (which handles online/offline mode gracefully)
         setupFirebaseApp();
         
     </script>
 </body>
 </html>
+
