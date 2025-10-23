@@ -3,851 +3,546 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prime Minister Election</title>
-    <!-- New Font: Press Start 2P for a retro/pixelated/Minecraft feel --><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <title>Minecraft Election System</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use a pixelated/retro-style font (closer match to the image) -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- COLOR SCHEME: DIAMOND/EMERALD NEON (UPDATED FOR DARK BG) --- */
-        :root {
-            --neon-green: #34d399; /* Emerald Green (RETAINED for success/checkmarks) */
-            --glow-green: #10b981; /* Darker Emerald (RETAINED for success/checkmarks) */
-            
-            /* NEW: Blue variables for the main title glow */
-            --neon-blue: #60a5fa; /* Vibrant Blue for title text */
-            --glow-blue: #3b82f6; /* Deeper Blue for the outer glow */
-
-            --glow-purple: #a78bfa; /* Purple (for vote buttons, unchanged) */
-            --amethyst-glow: #c084fc; /* Deep Purple (for foreground element glow, unchanged) */
-            
-            /* UPDATED: Dark Background for Floating Diamonds */
-            --dark-bg-deep: #1a1a2e; /* Deep dark blue-purple */
-            --dark-bg-medium: #22223a; /* Slightly lighter shade for blend */
-
-            --card-bg: #f3f4f6; /* Very Light Gray Card Background (for UI elements) */
-            --dark-text: #1f2937; /* Dark Gray/Almost Black Text for Contrast on light cards */
-            --light-text: #e0e0e0; /* Light text for use directly on dark background */
+        /* Base Styles for the Retro Theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Using the exact dark background color from the image */
+            background: #282a39; 
+            min-height: 100vh;
+            color: #d1d5db;
+            overflow-x: hidden; 
         }
         
-        body {
-            font-family: 'Press Start 2P', cursive;
-            background-color: var(--dark-bg-deep); /* Dark background */
-            color: var(--light-text); /* Use light text for dark background */
-            text-shadow: 0 0 1px var(--light-text); /* Subtle CRT/Pixel glow for body text */
+        /* Star Field Animation - Kept from the previous version for the background effect */
+        #star-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
 
-        /* Base glow styling for text elements (NOW VIBRANT BLUE) */
-        .glow-title {
-            color: var(--neon-blue); /* Changed from green to blue */
-            /* Using RGB values of the blue variables for the glow effect */
-            text-shadow: 0 0 5px rgba(96, 165, 250, 0.8), 0 0 15px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease-in-out;
-            font-size: 2.5rem; 
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #e0f2fe;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 5px 1px #93c5fd;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0.5; transform: scale(1); }
+        }
+
+        /* Card and Text Styles */
+        #app-container {
+            position: relative;
+            z-index: 10; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .glow-card {
+            /* Adjusted for the smooth white card with rounded corners and shadow */
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem 2rem;
+            border-radius: 1.5rem; /* Slightly more rounded */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .election-title {
+            /* Applied the pixel font to the main title */
+            font-family: 'Press Start 2P', cursive;
+            letter-spacing: 0.1rem;
+            font-size: 1.5rem; /* Adjusted size for pixel font legibility */
+            color: #4f46e5; /* Adjusted to a bright blue */
+            text-shadow: 
+                0 0 8px #93c5fd,
+                0 0 15px #60a5fa; /* Stronger blue glow */
+            line-height: 1.5;
+        }
+
+        .welcome-text {
+            /* Styled to match the bold, blocky Welcome text in the image */
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.25rem;
+            color: #2e303b; /* Very dark text color */
+            margin-bottom: 1.5rem;
             line-height: 1;
         }
-        @media (min-width: 768px) {
-            .glow-title {
-                font-size: 4rem;
-            }
-        }
         
-        /* Input/UI font fix */
-        input::placeholder, input, button {
-            font-family: 'Inter', sans-serif; 
+        /* Dashboard Specific Styles (Maintain readability for results) */
+        .candidate-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            background-color: #f3f4f6;
+            color: #111827;
         }
-
-        /* Styling for the interactive elements (Cards/Buttons) - Retaining AMETHYST glow on light cards */
-        .glow-element {
-            background-color: var(--card-bg); /* Light card background */
-            border: 1px solid rgba(192, 132, 252, 0.3); /* Subtle Purple border for depth */
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-            /* POLISH: Added inset shadow for a subtle 3D/bezel look */
-            box-shadow: 0 0 5px rgba(192, 132, 252, 0.2), inset 0 0 5px rgba(0, 0, 0, 0.1); 
-            color: var(--dark-text); /* Ensure dark text on light card */
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
         }
-        
-        .glow-element:hover {
-            transform: translateY(-2px);
-            border-color: rgba(192, 132, 252, 0.8); /* Stronger hover border */
-            box-shadow: 0 0 15px rgba(192, 132, 252, 0.6);
-            background-color: #ffffff; /* White on hover */
-        }
-
-        /* Vote Button Specific Styles (Purple) */
         .vote-button {
-            background-color: var(--glow-purple);
-            box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+            transition: all 0.1s ease;
         }
-        .vote-button:hover {
-             background-color: #c4b5fd;
-             box-shadow: 0 0 15px #c4b5fd;
-             transform: scale(1.02);
+        .vote-button:active {
+            transform: translateY(1px);
+        }
+        .progress-bar-container {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 1.5rem;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            transition: width 0.5s ease-out;
         }
 
-        /* Custom Message Box */
-        #custom-message {
+        /* Custom message box style (inherited from previous version) */
+        #message-box {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #0d121c; /* Dark text for readability on green */
-            padding: 1rem 2rem;
-            border-radius: 12px;
+            top: 20px;
+            right: 20px;
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
-            font-weight: bold;
-            font-family: 'Inter', sans-serif;
+            transform: translateX(100%);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+            min-width: 250px;
+            text-align: center;
         }
-        
-        #custom-message.show {
+        #message-box.show {
             opacity: 1;
             visibility: visible;
+            transform: translateX(0);
         }
-        
-        /* --- EXCITED SUCCESS STYLING (Emerald Green, retained for success) --- */
-        #custom-message.show.success {
-            background-color: var(--neon-green); /* Green background for success pop-up */
-            box-shadow: 0 0 10px var(--neon-green), 0 0 30px var(--glow-green), 0 0 5px white; 
-            animation: celebrate 0.5s ease-in-out infinite alternate; 
-            font-weight: 800; 
+        #message-box.success {
+            background-color: #10b981;
+            color: white;
         }
-        
-        @keyframes celebrate {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            100% { transform: translate(-50%, -52%) scale(1.03); } 
+        #message-box.error {
+            background-color: #ef4444;
+            color: white;
         }
-        /* --- END NEW STYLING --- */
-
-        /* Loading Spinner */
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3); /* Lighter border for visibility on dark BG */
-            border-left-color: var(--neon-green); 
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* --- FIREWORKS CONTAINER --- */
-        #fireworks-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; 
-            overflow: hidden;
-            z-index: 999; 
-            display: none; 
-        }
-        
-        /* Individual Firework Particle */
-        .firework {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background-color: transparent;
-            border-radius: 50%;
-            opacity: 0;
-            animation: firework-blast 1.5s ease-out forwards;
-        }
-
-        /* Styles for different colors of fireworks */
-        .firework.blue { background-color: #67e8f9; box-shadow: 0 0 8px #67e8f9; }
-        .firework.red { background-color: #fca5a5; box-shadow: 0 0 8px #fca5a5; }
-        .firework.yellow { background-color: #fcd34d; box-shadow: 0 0 8px #fcd34d; }
-        .firework.green { background-color: #34d399; box-shadow: 0 0 8px #34d399; }
-        .firework.purple { background-color: #c084fc; box-shadow: 0 0 8px #c084fc; }
-
-        @keyframes firework-blast {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            10% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            70% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1.5);
-                opacity: 0;
-            }
-        }
-
-        /* --- NEW: Background Animation CSS (ENHANCED VISIBILITY) --- */
-        #background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1; /* Below content */
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .shard {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.9); /* More opaque white */
-            box-shadow: 0 0 8px 3px rgba(103, 232, 249, 0.6); /* Icy blue glow */
-            border-radius: 50%;
-            opacity: 0;
-            animation: float 25s infinite ease-in-out alternate; /* Slightly longer animation */
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0vh) translateX(0vw) rotate(0deg) scale(0.8);
-                opacity: 0.6; /* Increased opacity for better visibility */
-            }
-            30% {
-                transform: translateY(-20vh) translateX(10vw) rotate(120deg) scale(1.1);
-                opacity: 0.9; 
-            }
-            60% {
-                transform: translateY(10vh) translateX(-15vw) rotate(240deg) scale(0.9);
-                opacity: 0.7; 
-            }
-            100% {
-                transform: translateY(0vh) translateX(0vw) rotate(360deg) scale(0.8);
-                opacity: 0.6; /* Increased opacity for better visibility */
-            }
-        }
-
     </style>
 </head>
-<body class="min-h-screen p-0 md:p-8 flex flex-col items-center">
+<body>
+    <div id="star-field"></div>
+    <div id="app-container">
+        <!-- Login View -->
+        <div id="login-view" class="glow-card text-center transition-opacity duration-500 opacity-100">
+            <h1 class="election-title mb-2">
+                <span style="font-size: 1.2em;">👑</span> ELECTION
+            </h1>
+            <h2 class="welcome-text text-gray-800 mb-6">Welcome</h2>
 
-    <!-- NEW: Background Animation Layer (z-index: 1) --><div id="background-animation"></div>
+            <p class="text-gray-600 mb-4">Please enter your unique Voting ID to proceed.</p>
 
-    <!-- Custom Message Box --><div id="custom-message"></div>
-    
-    <!-- Fireworks Container --><div id="fireworks-container"></div>
+            <input type="text" id="voting-id-input" placeholder="Enter Voting ID"
+                class="w-full p-3 mb-6 border border-gray-300 rounded-lg text-gray-800 focus:ring-purple-400 focus:border-purple-400 transition duration-150">
 
-    <!-- 1. LOGIN SCREEN --><!-- Added z-10 to ensure it is above the background animation (z-1) --><div id="login-screen" class="flex justify-center items-center min-h-screen w-full absolute top-0 left-0 bg-white/5 z-20 transition-opacity duration-500 z-10">
-        <div class="glow-element rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl">
-            <!-- POLISH: Added main title to login screen -->
-            <h1 class="font-extrabold mb-5 text-3xl glow-title">👑 ELECTION</h1>
-            <h2 class="text-xl font-extrabold mb-3 text-gray-800 font-[Press Start 2P]">Welcome</h2>
-            <p class="text-gray-700 mb-6 font-[Inter]">Please enter your unique Voting ID to proceed.</p>
-            
-            <input id="loginVotingId" type="text" placeholder="Enter Voting ID"
-                   class="p-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-800 w-full mb-6"
-                   onkeydown="if(event.key === 'Enter') document.getElementById('loginButton').click()"
-            >
-            
-            <button id="loginButton"
-                    class="vote-button text-white font-bold py-3 px-6 rounded-lg transition-all active:scale-90 w-full"
-            >
+            <button id="login-button" 
+                style="background-color: #a78bfa;"
+                class="w-full text-white font-bold py-3 rounded-lg shadow-lg hover:opacity-90 transition duration-150 transform hover:scale-[1.01] active:scale-[0.99] text-xl">
                 Login
             </button>
-            <p id="loginError" class="text-red-600 text-sm mt-4 hidden font-[Inter]"></p>
+            <p id="login-error" class="text-red-500 text-sm mt-3 hidden">Please enter a valid ID.</p>
             
-            <!-- Hint for testing/demo was here, but has been removed as requested -->
+            <!-- NEW: Display Firebase Status Here -->
+            <p id="firebase-status" class="mt-3 text-xs text-center font-bold text-gray-500">
+                Initializing Database...
+            </p>
+        </div>
+
+        <!-- Dashboard View (Hidden initially) -->
+        <div id="dashboard-view" class="max-w-4xl w-full p-4 md:p-8 transition-opacity duration-500 opacity-0 hidden">
+            <header class="text-center py-6 border-b border-gray-600">
+                <h1 class="election-title text-4xl mb-1">
+                    LIVE RESULTS
+                </h1>
+                <p id="total-votes" class="mt-2 text-xl text-yellow-400 font-semibold">Total Votes: 0</p>
+            </header>
+
+            <!-- Candidate Voting Section -->
+            <section id="candidate-list" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"></section>
+            
+            <!-- User ID Display -->
+            <footer class="mt-12 pt-6 border-t border-gray-700 text-center">
+                <p class="text-gray-400 text-sm">Your unique identifier (Authenticated Session):</p>
+                <p id="user-id-display" class="font-mono text-xs break-all text-gray-300 mt-1">Authenticating...</p>
+            </footer>
         </div>
     </div>
-
-    <!-- 2. MAIN APPLICATION CONTENT (Hidden initially) --><!-- Added z-10 to ensure it is above the background animation (z-1) --><div id="main-app-content" class="hidden flex flex-col items-center w-full p-4 md:p-0 relative z-10">
-        <header class="text-center mb-10 max-w-4xl w-full">
-            <!-- Header content will be updated in JS for Admin View -->
-            <h1 id="app-header-title" class="font-extrabold mb-2 pt-4 glow-title">
-                🏛️ PRIME MINISTER VOTE
-            </h1>
-            <p id="app-header-subtitle" class="text-gray-200 text-sm font-[Inter]">Real-time, secured voting for the Prime Minister.</p>
-        </header>
-
-        <!-- Main Voting Panel --><div id="voting-panel" class="glow-element rounded-xl p-6 mb-8 w-full max-w-lg shadow-2xl">
-            <h2 id="ballot-title" class="text-lg font-bold mb-4 text-gray-800 border-b border-gray-300 pb-2 font-[Inter]">Your Ballot</h2>
-            
-            <!-- This container will hold either the Candidate List OR the Voted confirmation --><div id="voting-content"> 
-                <div class="flex flex-col gap-3 mb-6">
-                    <!-- Minecraft Name input is now here --><input id="playerName" type="text" placeholder="Your Minecraft name (Voter ID)"
-                           class="p-3 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-800 font-[Inter]"
-                    >
-                </div>
-                
-                <h3 class="text-base font-bold mb-4 text-gray-700 font-[Inter]">Candidates for P.M.</h3>
-                
-                <!-- Candidate List and Vote Buttons (Dynamically rendered) --><div id="candidates" class="flex flex-col gap-4">
-                    <!-- Rendered by renderCandidates() --></div>
-            </div>
-
-        </div>
-
-        <!-- Results Box (Now hidden from voters) --><h2 id="results-title" class="text-xl font-bold mb-4 glow-title hidden">📊 LIVE RESULTS</h2>
-        <div id="results" class="glow-element rounded-xl p-6 w-full max-w-lg text-left text-base text-gray-700 min-h-[150px] font-[Inter] hidden">
-            <div id="loading-results" class="flex justify-center items-center h-full">
-                <div class="spinner"></div>
-                <span class="ml-3">Loading live results...</span>
-            </div>
-            <!-- Changed font to Press Start 2P for retro results -->
-            <pre id="results-content" class="text-sm font-[Press Start 2P] whitespace-pre-wrap hidden"></pre>
-        </div>
-
-        <!-- UPDATED FOOTER AND ATTRIBUTION --><footer class="mt-12 w-full max-w-lg text-gray-400 font-[Inter] text-center">
-            <p class="text-xs">Powered by Firestore Real-time Data | Designed for Cloudflare Pages 🧱</p>
-            <p class="text-xs mt-1 text-right">Made by Prashant Jaiswal</p>
-        </footer>
-    </div>
-
+    
+    <!-- Custom Message Box -->
+    <div id="message-box" class="text-white"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // Only import Firebase features if we expect to use the database
-        let getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, serverTimestamp, setDoc, doc, setLogLevel;
-
-        // Check for environment variables to decide if we run in ONLINE or OFFLINE mode
-        let firebaseConfig = {};
-        let isOnlineMode = false;
-
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                firebaseConfig = JSON.parse(__firebase_config);
-                // Check if the configuration is actually valid (has an apiKey)
-                if (firebaseConfig.apiKey) {
-                    isOnlineMode = true;
-                }
-            }
-        } catch (e) {
-            console.error("Error parsing Firebase configuration:", e);
-            // isOnlineMode remains false
-        }
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, setDoc, updateDoc, increment, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        if (isOnlineMode) {
-            // Dynamically import Firebase services ONLY if running in an environment with config
-            const modules = await Promise.all([
-                import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"),
-                import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js")
-            ]);
-            
-            // Assign imported functions
-            ({ getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = modules[0]);
-            ({ getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, serverTimestamp, setDoc, doc, setLogLevel } = modules[1]);
-            
-            // Set log level if the functions are available
-            setLogLevel('Debug');
-        }
-
-        // --- HARDCODED ELECTION DATA (Defined in the code) ---
-        
-        // 1. The fixed candidates and their parties
-        const FIXED_CANDIDATES = [
-            { name: "Steve", party: "The Builder Party (TBP)" },
-            { name: "Alex", party: "Redstone Engineers (RSE)" },
-            { name: "Iron Golem", party: "Village Defense Front (VDF)" },
+        // --- Global Configuration ---
+        const CANDIDATES = [
+            { id: 'steve', name: 'Steve the Builder', party: 'Block Party', color: 'bg-green-600' },
+            { id: 'alex', name: 'Alex the Explorer', party: 'Adventure Coalition', color: 'bg-red-600' },
+            { id: 'villager', name: 'The Trader', party: 'Emerald League', color: 'bg-blue-600' },
+            { id: 'piglin', name: 'The Piglin Boss', party: 'Nether Alliance', color: 'bg-yellow-600' }
         ];
-        
-        // ** ADMIN CODE **
-        const ADMIN_CODE = "6969"; 
 
-        // 2. Valid, single-use voting codes
-        // CODES for 10 voters (4-digit numerical IDs)
-        const VALID_VOTING_CODES = new Set([
-            "1138", "2599", "3407", "4815", 
-            "5050", "6621", "7143", "8002",
-            "9350", "0491"
-        ]);
+        // --- Firebase/Firestore Setup ---
+        let db;
+        let auth;
+        let currentUserId = 'anonymous';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const COLLECTION_PATH = `artifacts/${appId}/public/data/minecraft_election_votes`;
 
-        // --- FIREBASE INITIALIZATION AND SETUP (ROBUST AGAINST MISSING CONFIG) ---
-
-        // Using '2242' as the default application ID as requested by the user.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : '2242';
-
-        let db, auth;
         let isAuthReady = false;
-        let currentVotingCode = null; // Store the validated code here
-        
-        // Firestore Collection Paths (Public Data)
-        const VOTES_PATH = `artifacts/${appId}/public/data/votes`;
-        const USED_CODES_PATH = `artifacts/${appId}/public/data/used_codes`;
+        let isOnline = false; // NEW state flag
 
-        // State to hold current vote totals
-        let voteTotals = {};
+        // --- UI Element References ---
+        const views = {
+            login: document.getElementById('login-view'),
+            dashboard: document.getElementById('dashboard-view')
+        };
+        const loginInput = document.getElementById('voting-id-input');
+        const loginButton = document.getElementById('login-button');
+        const loginError = document.getElementById('login-error');
+        const firebaseStatusElement = document.getElementById('firebase-status'); // NEW reference
 
-        // Custom Message Handler (Replaces standard alert())
-        function showMessage(message, isError = true) {
-            const msgBox = document.getElementById("custom-message");
-            msgBox.textContent = message;
-            
-            // Reset classes first
-            msgBox.className = ''; 
-            
-            // Determine if it's a success message
-            const isSuccess = !isError;
-            
-            // Add base 'show' class and 'success' if applicable
-            msgBox.classList.add('show');
-            if (isSuccess) {
-                msgBox.classList.add('success'); // New class for excited styling
+        /**
+         * Switches the application's view with a fade transition.
+         * @param {'login'|'dashboard'} viewName 
+         */
+        function switchView(viewName) {
+            if (viewName === 'dashboard') {
+                views.login.classList.add('opacity-0');
+                // Use a short delay before hiding completely
+                setTimeout(() => views.login.classList.add('hidden'), 500); 
+                
+                views.dashboard.classList.remove('hidden');
+                setTimeout(() => {
+                    views.dashboard.classList.remove('opacity-0');
+                    views.dashboard.classList.add('opacity-100');
+                }, 10);
+                if (isAuthReady) {
+                    loadCandidates(); // Start listening for data once dashboard is visible
+                }
             } else {
-                msgBox.classList.add('error'); // Class for error styling
+                 views.dashboard.classList.add('opacity-0');
+                 setTimeout(() => views.dashboard.classList.add('hidden'), 500);
+                 
+                 views.login.classList.remove('hidden');
+                 setTimeout(() => {
+                    views.login.classList.remove('opacity-0');
+                    views.login.classList.add('opacity-100');
+                 }, 10);
+            }
+        }
+
+        /**
+         * Simulates login based on user input.
+         */
+        function handleLogin() {
+            if (!isOnline) {
+                showMessage("Voting is disabled while offline.", 'error');
+                return;
             }
 
-            // Style adjustments based on success/error
-            msgBox.style.backgroundColor = isError ? '#ef4444' : 'var(--neon-green)'; 
-            msgBox.style.boxShadow = isError 
-                ? '0 4px 15px rgba(239, 68, 68, 0.8)' 
-                : '0 4px 15px rgba(52, 211, 153, 0.8)'; 
-            
+            const votingId = loginInput.value.trim();
+            if (votingId.length < 3) {
+                loginError.classList.remove('hidden');
+                return;
+            }
+            loginError.classList.add('hidden');
+            // In a real app, this would validate the ID. Here, any valid input proceeds.
+            switchView('dashboard');
+        }
+
+        /**
+         * Generates and places animated stars in the background.
+         */
+        function createStarBackground() {
+            const starField = document.getElementById('star-field');
+            const numStars = 100;
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                // Random position
+                star.style.left = `${Math.random() * screenWidth}px`;
+                star.style.top = `${Math.random() * screenHeight}px`;
+                // Random size
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                // Random animation delay/duration
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                starField.appendChild(star);
+            }
+        }
+
+        // --- Messaging (from previous version) ---
+        function showMessage(message, type) {
+            const box = document.getElementById('message-box');
+            box.textContent = message;
+            box.className = `show ${type}`; 
             setTimeout(() => {
-                msgBox.className = '';
+                box.classList.remove('show');
             }, 3000);
         }
 
-        // --- UI TRANSITION ---
-
-        function showApp() {
-            document.getElementById("login-screen").classList.add('opacity-0');
-            
-            // Wait for transition to finish before hiding
-            setTimeout(() => {
-                document.getElementById("login-screen").classList.add('hidden');
-                document.getElementById("main-app-content").classList.remove('hidden');
-            }, 500); // Matches transition duration
-        }
-        
-        function showAdminView() {
-            document.getElementById("login-screen").classList.add('opacity-0');
-            
-            // Wait for transition to finish before showing admin view
-            setTimeout(() => {
-                document.getElementById("login-screen").classList.add('hidden');
-                document.getElementById("main-app-content").classList.remove('hidden');
-
-                // 1. Update Header for Admin View
-                document.getElementById('app-header-title').textContent = "📊 P.M. ELECTION RESULTS (ADMIN)";
-                document.getElementById('app-header-subtitle').textContent = "Final Tally. Votes are private until manually released.";
-
-                // 2. Hide the Voting Panel
-                document.getElementById("voting-panel").classList.add('hidden');
-                
-                // 3. Show the Results Box
-                document.getElementById("results-title").classList.remove('hidden'); 
-                document.getElementById("results").classList.remove('hidden'); 
-                
-            }, 500); // Matches transition duration
-        }
-
-        function setLoginError(message) {
-            const errorElement = document.getElementById("loginError");
-            errorElement.textContent = message;
-            errorElement.classList.remove('hidden');
-            setTimeout(() => { errorElement.classList.add('hidden'); }, 4000);
-        }
-
-
-        // --- CORE APPLICATION LOGIC ---
-
-        // Renamed function to avoid conflict with the imported Firebase initializeApp
-        async function setupFirebaseApp() {
-            if (!isOnlineMode) {
-                // OFFLINE MODE: Skip Firebase initialization, but set the error message.
-                const loginError = document.getElementById("loginError");
-                loginError.textContent = "Database connection error. Voting is disabled. (Offline Mode)";
-                loginError.classList.remove('hidden');
-                document.getElementById("loginButton").disabled = true;
-                
-                // Set isAuthReady to true to allow the background animation to be called in the main loop
-                isAuthReady = true; 
-                renderCandidates();
-                setupRealtimeResults(); // Setup results in offline mode (will show 0 votes)
-                
-                // Attach login event listener (though it will fail verification)
-                document.getElementById('loginButton').addEventListener('click', handleLogin);
+        // --- Voting and Rendering (from previous version) ---
+        async function handleVote(candidateId) {
+            if (!db) {
+                showMessage("Database not initialized. Please wait.", 'error');
                 return;
             }
-            
-            // ONLINE MODE: Proceed with Firebase initialization
+
             try {
-                // Use 'const' for the app variable, which is local to this function scope
+                const candidateDocRef = doc(db, COLLECTION_PATH, candidateId);
+                
+                await updateDoc(candidateDocRef, {
+                    count: increment(1)
+                });
+
+                showMessage(`Voted for ${CANDIDATES.find(c => c.id === candidateId).name}!`, 'success');
+            } catch (error) {
+                console.error("Error voting:", error);
+                if (error.code === 'not-found' || error.message.includes('No document to update')) {
+                    try {
+                        const candidate = CANDIDATES.find(c => c.id === candidateId);
+                        await setDoc(doc(db, COLLECTION_PATH, candidateId), {
+                            name: candidate.name,
+                            party: candidate.party,
+                            count: 1
+                        });
+                        showMessage(`Voted for ${candidate.name}! (Created candidate record)`, 'success');
+                    } catch (e) {
+                        console.error("Error creating candidate record:", e);
+                        showMessage("Error casting vote and initializing record.", 'error');
+                    }
+                } else {
+                     showMessage("Error casting vote.", 'error');
+                }
+            }
+        }
+
+        function renderCandidateCard(candidate, currentVotes, totalVotes) {
+            const percent = totalVotes === 0 ? 0 : (currentVotes / totalVotes) * 100;
+            const progressWidth = `${percent.toFixed(2)}%`;
+            const votesFormatted = currentVotes.toLocaleString();
+            
+            // Map Tailwind color classes to specific text colors for display
+            const colorMap = {
+                'bg-green-600': 'text-green-600',
+                'bg-red-600': 'text-red-600',
+                'bg-blue-600': 'text-blue-600',
+                'bg-yellow-600': 'text-yellow-600'
+            };
+            const textColor = colorMap[candidate.color] || 'text-indigo-600';
+
+
+            return `
+                <div class="candidate-card p-6 rounded-xl shadow-lg border border-gray-200 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">${candidate.name}</h2>
+                        <p class="text-lg font-medium text-gray-600 mb-4">${candidate.party}</p>
+
+                        <!-- Results Display -->
+                        <div class="mb-4">
+                            <p class="text-2xl font-extrabold ${textColor}">${votesFormatted} <span class="text-sm font-normal text-gray-500">votes</span></p>
+                            <p class="text-sm font-semibold mt-1 text-gray-700">${percent.toFixed(2)}%</p>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress-bar-container mb-6">
+                            <div class="progress-bar ${candidate.color} shadow-md" style="width: ${progressWidth};"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vote Button -->
+                    <button data-id="${candidate.id}"
+                        class="vote-button w-full ${candidate.color} text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity duration-150 shadow-md transform hover:scale-[1.01] active:scale-[0.99]">
+                        VOTE
+                    </button>
+                </div>
+            `;
+        }
+        
+        function renderDashboard(candidateData) {
+            const listContainer = document.getElementById('candidate-list');
+            const totalVotesElement = document.getElementById('total-votes');
+            listContainer.innerHTML = ''; 
+
+            let totalVotes = 0;
+            const currentVotes = {};
+
+            CANDIDATES.forEach(candidate => {
+                const count = candidateData[candidate.id]?.count || 0;
+                totalVotes += count;
+                currentVotes[candidate.id] = count;
+            });
+
+            totalVotesElement.textContent = `Total Votes: ${totalVotes.toLocaleString()}`;
+
+            CANDIDATES.forEach(candidate => {
+                const count = currentVotes[candidate.id];
+                listContainer.innerHTML += renderCandidateCard(candidate, count, totalVotes);
+            });
+
+            document.querySelectorAll('.vote-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const candidateId = e.currentTarget.getAttribute('data-id');
+                    handleVote(candidateId);
+                });
+            });
+        }
+
+        async function initializeCandidateRecords() {
+            for (const candidate of CANDIDATES) {
+                const docRef = doc(db, COLLECTION_PATH, candidate.id);
+                try {
+                     await setDoc(docRef, { 
+                        name: candidate.name, 
+                        party: candidate.party, 
+                        count: 0 
+                    }, { merge: true }); 
+                } catch (e) {
+                    console.warn(`Could not set initial record for ${candidate.id}.`, e);
+                }
+            }
+        }
+
+        function loadCandidates() {
+            if (!db || !isAuthReady) return;
+
+            const collectionRef = collection(db, COLLECTION_PATH);
+            
+            onSnapshot(collectionRef, (snapshot) => {
+                const candidateData = {};
+                snapshot.forEach(docSnapshot => {
+                    const data = docSnapshot.data();
+                    candidateData[docSnapshot.id] = { 
+                        name: data.name, 
+                        party: data.party, 
+                        count: data.count || 0 
+                    };
+                });
+                renderDashboard(candidateData);
+            }, (error) => {
+                console.error("Firestore Listener Error:", error);
+                showMessage("Real-time results connection lost.", 'error');
+            });
+        }
+
+        // --- Initialization ---
+        async function setupFirebase() {
+            firebaseStatusElement.textContent = 'Checking configuration...';
+            loginButton.disabled = true;
+
+            if (Object.keys(firebaseConfig).length === 0) {
+                firebaseStatusElement.textContent = 'Database connection error. Voting is disabled. (Offline Mode)';
+                firebaseStatusElement.classList.add('text-red-500');
+                isOnline = false;
+                return;
+            }
+
+            try {
+                setLogLevel('Debug');
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Sign in logic is now in the initialization part
-                onAuthStateChanged(auth, async (user) => {
-                    if (!user) {
-                        try {
-                            if (typeof __initial_auth_token !== 'undefined') {
-                                await signInWithCustomToken(auth, __initial_auth_token);
-                            } else {
-                                await signInAnonymously(auth);
+                firebaseStatusElement.textContent = 'Authenticating user...';
+
+                await new Promise((resolve, reject) => {
+                    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                        unsubscribe(); 
+                        if (user) {
+                            currentUserId = user.uid;
+                        } else {
+                            try {
+                                if (initialAuthToken) {
+                                    const userCredential = await signInWithCustomToken(auth, initialAuthToken);
+                                    currentUserId = userCredential.user.uid;
+                                } else {
+                                    const userCredential = await signInAnonymously(auth);
+                                    currentUserId = userCredential.user.uid;
+                                }
+                            } catch (error) {
+                                console.error("Firebase Auth Error:", error);
+                                // Fallback to a random ID if auth fails completely
+                                currentUserId = crypto.randomUUID(); 
                             }
-                        } catch (error) {
-                            console.error("Auth error:", error);
-                            setLoginError("Could not sign into the election service.");
-                            return;
                         }
-                    }
-                    isAuthReady = true;
-                    
-                    // Setup listeners/renders only after auth is ready
-                    setupRealtimeResults(); 
-                    renderCandidates(); // Render candidate cards for later use
-                    
-                    // Attach login event listener
-                    document.getElementById('loginButton').addEventListener('click', handleLogin);
-
+                        isAuthReady = true;
+                        document.getElementById('user-id-display').textContent = currentUserId;
+                        await initializeCandidateRecords();
+                        resolve();
+                    }, reject);
                 });
+                
+                // Success: Update UI
+                isOnline = true;
+                firebaseStatusElement.textContent = 'Online. Ready to Vote.';
+                firebaseStatusElement.classList.remove('text-red-500', 'text-gray-500');
+                firebaseStatusElement.classList.add('text-green-500');
+                loginButton.disabled = false;
+
 
             } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                setLoginError("System setup error. Check connection.");
+                console.error("Global Firebase Setup Error:", error);
+                // Failure: Update UI to show the specific error if possible
+                isOnline = false;
+                document.getElementById('user-id-display').textContent = `Setup Failed: ${error.message}`;
+                firebaseStatusElement.textContent = `Database connection error: ${error.message.substring(0, 50)}... (Offline Mode)`;
+                firebaseStatusElement.classList.remove('text-gray-500');
+                firebaseStatusElement.classList.add('text-red-500');
             }
         }
-        
-        async function handleLogin() {
-            if (!isAuthReady) {
-                return setLoginError("Service is connecting. Please wait a moment.");
-            }
 
-            const votingIdInput = document.getElementById("loginVotingId");
-            const votingId = votingIdInput.value.trim().toLowerCase();
-
-            if (!votingId) return setLoginError("Please enter your Voting ID.");
+        window.onload = () => {
+            createStarBackground();
+            setupFirebase();
             
-            // If offline, voting and admin are disabled
-            if (!isOnlineMode) {
-                return setLoginError("Voting is disabled because the database is offline.");
-            }
-
-
-            // 1. Check for Admin Login first
-            if (votingId === ADMIN_CODE) {
-                showMessage(`Admin Login successful. Displaying results.`, false);
-                showAdminView();
-                return;
-            }
-
-            // 2. Voting ID validation (Code check against hardcoded list)
-            if (!VALID_VOTING_CODES.has(votingId)) {
-                return setLoginError("Invalid Voting ID.");
-            }
-
-            // 3. Voting ID validation (Firestore check for single-use)
-            try {
-                const codesQuery = query(collection(db, USED_CODES_PATH), where("code", "==", votingId));
-                const codeSnapshot = await getDocs(codesQuery);
-
-                if (!codeSnapshot.empty) {
-                    // Code has already been used
-                    return setLoginError("This Voting ID has already been used!");
-                }
-                
-                // Success! Store code and transition
-                currentVotingCode = votingId;
-                showMessage(`Welcome! ID ${votingId} accepted.`, false);
-                showApp();
-
-            } catch (error) {
-                console.error("Login check failed:", error);
-                setLoginError("An error occurred during verification. Try again.");
-            }
-        }
-
-        function renderCandidates() {
-            const candidatesDiv = document.getElementById("candidates");
-            candidatesDiv.innerHTML = ""; // Clear existing content
-
-            FIXED_CANDIDATES.forEach(candidate => {
-                const candidateCard = document.createElement("div");
-                // Updated classes for bright theme
-                candidateCard.className = "p-4 rounded-lg flex justify-between items-center bg-white hover:bg-gray-100 transition-all shadow-md border border-gray-200";
-                candidateCard.innerHTML = `
-                    <div>
-                        <p class="text-xl font-bold text-gray-800 font-[Inter]">${candidate.name}</p>
-                        <p class="text-sm text-gray-500 font-[Inter]">${candidate.party}</p>
-                    </div>
-                    <button id="btn-${candidate.name.replace(/\s/g, '')}" 
-                            data-candidate="${candidate.name}"
-                            class="vote-button text-white font-bold py-2 px-6 rounded-lg transition-all active:scale-90 font-[Inter]"
-                            ${!isOnlineMode ? 'disabled' : ''}>
-                        Vote
-                    </button>
-                `;
-                
-                candidatesDiv.appendChild(candidateCard);
-
-                // Add event listener to the button
-                const voteButton = document.getElementById(`btn-${candidate.name.replace(/\s/g, '')}`);
-                if(voteButton) {
-                    voteButton.addEventListener('click', () => handleVote(candidate.name));
+            // Attach event listener for the login button
+            loginButton.addEventListener('click', handleLogin);
+            
+            // Allow pressing enter to log in
+            loginInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
                 }
             });
-            
-            // If offline, dim the button text
-            if (!isOnlineMode) {
-                document.querySelectorAll('.vote-button').forEach(btn => {
-                    btn.textContent = 'Offline';
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    btn.classList.remove('vote-button'); // Remove hover effects
-                });
-            }
-        }
-
-        const FIREWORK_COLORS = ['blue', 'red', 'yellow', 'green', 'purple'];
-
-        function createFirework(x, y) {
-            const container = document.getElementById('fireworks-container');
-            const color = FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)];
-            
-            const fireworkElement = document.createElement('div');
-            fireworkElement.className = `firework ${color}`;
-            fireworkElement.style.left = `${x}px`;
-            fireworkElement.style.top = `${y}px`;
-            
-            container.appendChild(fireworkElement);
-
-            setTimeout(() => {
-                fireworkElement.remove();
-            }, 1500); // Matches animation duration
-        }
-
-        function triggerFireworks() {
-            const container = document.getElementById('fireworks-container');
-            container.style.display = 'block'; // Show the container
-
-            // Trigger multiple fireworks
-            for (let i = 0; i < 10; i++) { // Blast 10 fireworks
-                const randomX = Math.random() * window.innerWidth;
-                const randomY = Math.random() * window.innerHeight * 0.7; // Keep them in upper 70% of screen
-                createFirework(randomX, randomY);
-            }
-
-            // Hide the container after the fireworks are done
-            setTimeout(() => {
-                container.style.display = 'none';
-            }, 2000); // Display for 2 seconds
-        }
-
-        // NEW: Function to create and manage the subtle background animation
-        function createBackgroundAnimation() {
-            const container = document.getElementById('background-animation');
-            const numShards = 40; // Total number of particles
-
-            for (let i = 0; i < numShards; i++) {
-                const shard = document.createElement('div');
-                shard.className = 'shard';
-                
-                // Random size (5px to 15px)
-                const size = Math.random() * 10 + 5; 
-                shard.style.width = `${size}px`;
-                shard.style.height = `${size}px`;
-
-                // Random starting position across the entire viewport
-                shard.style.left = `${Math.random() * 100}vw`;
-                shard.style.top = `${Math.random() * 100}vh`;
-
-                // Random animation duration (15s to 30s)
-                const duration = Math.random() * 15 + 15; 
-                shard.style.animationDuration = `${duration}s`;
-                
-                // Random animation delay (to spread out the starting positions)
-                shard.style.animationDelay = `-${Math.random() * duration}s`; 
-
-                container.appendChild(shard);
-            }
-        }
-
-
-        async function handleVote(candidateName) {
-            if (!isOnlineMode) {
-                return showMessage("Voting is disabled (Database Offline).", true);
-            }
-            if (!isAuthReady || !currentVotingCode) {
-                return showMessage("Authentication error. Please log in again.", true);
-            }
-            
-            const player = document.getElementById("playerName").value.trim();
-            const votingId = currentVotingCode; // Use the stored, validated code
-
-            if (!player) return showMessage("Please enter your Minecraft name (Voter ID)!", true);
-
-            try {
-                // 1. Final check for code usage (although it shouldn't happen, good practice)
-                const codesQuery = query(collection(db, USED_CODES_PATH), where("code", "==", votingId));
-                const codeSnapshot = await getDocs(codesQuery);
-                if (!codeSnapshot.empty) {
-                    return showMessage("This Voting ID was used during your session. Please refresh to see the results.", true);
-                }
-
-
-                // 2. Register the vote (Atomic operation)
-                await addDoc(collection(db, VOTES_PATH), {
-                    candidateName: candidateName,
-                    voterId: player,
-                    votingCodeUsed: votingId, // Store the code used for audit trail
-                    timestamp: serverTimestamp()
-                });
-
-                // 3. Mark the code as used
-                // Using setDoc with the code as the document ID for easy lookup and uniqueness
-                await setDoc(doc(db, USED_CODES_PATH, votingId), {
-                    code: votingId,
-                    usedBy: player,
-                    timestamp: serverTimestamp()
-                });
-
-                // Success! 
-                
-                // Update the title of the panel
-                document.getElementById("ballot-title").innerHTML = `<span class="text-emerald-600">✅ BALLOT CAST</span>`;
-                
-                // Replace the entire voting-content with the confirmation
-                document.getElementById("voting-content").innerHTML = `
-                    <div class="p-6 rounded-xl bg-gray-100 border-2 border-emerald-500/80 shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-500">
-                        <div class="text-6xl mb-4 text-emerald-400" style="text-shadow: 0 0 15px #34d399, 0 0 30px #10b981; font-family: 'Press Start 2P', cursive;">
-                            🎉
-                        </div>
-                        <p class="text-2xl font-extrabold text-gray-800 mb-3 font-[Inter] glow-title">
-                            VOTE CONFIRMED!
-                        </p>
-                        <p class="text-lg text-gray-700 font-[Inter]">
-                            Your vote for <span class="text-emerald-600 font-bold">${candidateName}</span> for Prime Minister has been cast.
-                            <br>Thank you for participating in the P.M. Election!
-                        </p>
-                        <p class="text-sm text-gray-500 mt-4 font-[Inter]">
-                            Your unique Voting ID <span class="font-bold">${votingId}</span> is now used.
-                        </p>
-                    </div>
-                `;
-                
-                // Show the new, exciting success message
-                showMessage(`🎉 VOTE SUCCESS! ${candidateName} IS COUNTED! 🚀`, false);
-
-                // Trigger fireworks after successful vote
-                triggerFireworks();
-
-            } catch (error) {
-                console.error("Voting failed:", error);
-                showMessage("An error occurred during voting. Try again.", true);
-            }
-        }
-        
-        function setupRealtimeResults() {
-            const loadingDiv = document.getElementById("loading-results");
-            const resultsPre = document.getElementById("results-content");
-            
-            if (!isOnlineMode) {
-                loadingDiv.classList.add('hidden');
-                resultsPre.classList.remove('hidden');
-                resultsPre.textContent = "Database is OFFLINE. Live results cannot be loaded.";
-                return;
-            }
-            
-            // Use onSnapshot to listen for changes to the votes collection in real-time
-            // This function runs to keep the data updated, even though the UI is hidden for voters.
-            const votesCollection = collection(db, VOTES_PATH);
-
-            onSnapshot(votesCollection, (snapshot) => {
-                // Reset vote totals
-                voteTotals = {};
-                let totalVotes = 0;
-                
-                // Initialize totals for all candidates
-                FIXED_CANDIDATES.forEach(c => {
-                    voteTotals[c.name] = 0;
-                });
-
-                // Tally the votes from the snapshot
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (voteTotals.hasOwnProperty(data.candidateName)) {
-                        voteTotals[data.candidateName]++;
-                        totalVotes++;
-                    }
-                });
-
-                showResults(totalVotes);
-            }, (error) => {
-                console.error("Error setting up real-time listener:", error);
-            });
-        }
-        
-        // POLISH: Updated showResults to include a text-based bar chart and strong winner emphasis
-        function showResults(totalVotes) {
-            const loadingDiv = document.getElementById("loading-results");
-            const resultsPre = document.getElementById("results-content");
-            
-            loadingDiv.classList.add('hidden');
-            resultsPre.classList.remove('hidden');
-
-            if (totalVotes === 0) {
-                 resultsPre.textContent = "No votes have been cast yet. Be the first to vote!";
-                 return;
-            }
-
-            // Bar chart parameters
-            const MAX_BAR_LENGTH = 20;
-            const BAR_CHAR = "█"; 
-            const EMPTY_CHAR = "░";
-
-            let resultText = `Total Votes Cast: ${totalVotes}\n\n`;
-            let highest = -1;
-            
-            // Convert totals to an array and sort by vote count descending
-            const sortedResults = FIXED_CANDIDATES.map(c => ({
-                name: c.name,
-                party: c.party,
-                count: voteTotals[c.name] || 0
-            })).sort((a, b) => b.count - a.count);
-
-            // Find the highest count to normalize the bar size
-            highest = sortedResults[0]?.count || 0;
-
-
-            sortedResults.forEach(item => {
-                const count = item.count;
-                const percent = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
-                
-                // Calculate bar length based on the highest count, not total votes
-                const barLength = highest > 0 ? Math.round((count / highest) * MAX_BAR_LENGTH) : 0;
-                const bar = BAR_CHAR.repeat(barLength).padEnd(MAX_BAR_LENGTH, EMPTY_CHAR);
-
-                // Format: Candidate Name (Party)
-                resultText += `${item.name.toUpperCase()} (${item.party}):\n`;
-                // Format: [${bar}] Count (Percentage)
-                resultText += `  [${bar}] ${count} (${percent}%)\n\n`;
-            });
-            
-            
-            // Determine winner(s)
-            const winningCandidates = sortedResults.filter(item => item.count === highest && highest > 0);
-            
-            resultText += `\n-----------------------------------\n`;
-            
-            if (winningCandidates.length === 1) {
-                // Stronger visual emphasis on winner
-                const winnerName = winningCandidates[0].name.toUpperCase();
-                resultText += `\n🏆 🏆 🏆\n`;
-                resultText += `  NEW PRIME MINISTER: ${winnerName}\n`;
-                resultText += `🏆 🏆 🏆\n`;
-            } else if (winningCandidates.length > 1) {
-                const tieNames = winningCandidates.map(c => c.name.toUpperCase()).join(' & ');
-                resultText += `\n🤝 🤝 🤝\n`;
-                resultText += `  ELECTION TIE: ${tieNames}\n`;
-                resultText += `🤝 🤝 🤝\n`;
-            }
-
-            resultsPre.textContent = resultText;
-        }
-
-        // --- GLOBAL INITIALIZATION ---
-        
-        // 1. Start the animation unconditionally (Fixes the animation issue)
-        createBackgroundAnimation(); 
-
-        // 2. Start the application setup (which now handles online/offline mode gracefully)
-        setupFirebaseApp();
-        
+        };
     </script>
 </body>
 </html>
