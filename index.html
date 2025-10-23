@@ -132,8 +132,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* --- CELEBRATION EFFECTS CONTAINER --- */
-        /* Renamed from fireworks-container conceptually, but the ID remains the same for simplicity */
+        /* --- FIREWORKS CONTAINER --- */
         #fireworks-container {
             position: fixed;
             top: 0;
@@ -183,70 +182,6 @@
             }
         }
 
-        /* --- NEW: Party Poppers (Confetti) and Balloons CSS --- */
-
-        /* Confetti particle style (Popper) */
-        .popper-confetti {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            opacity: 0;
-            z-index: 1001;
-            /* Animation duration will be set dynamically in JS */
-        }
-
-        /* Confetti animation: shoots up from the bottom center, scatters, and fades */
-        @keyframes confetti-blast {
-            0% {
-                transform: translateY(0vh) scale(1) translateX(0vw);
-                opacity: 1;
-            }
-            100% {
-                /* Final transform is set in JS for maximum variety, but this is the general direction */
-                transform: translateY(-50vh) scale(0.5) rotateZ(360deg);
-                opacity: 0;
-            }
-        }
-
-        /* Balloon particle style */
-        .balloon {
-            position: absolute;
-            width: 30px;
-            height: 40px;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* Slightly elongated shape */
-            opacity: 0.8;
-            z-index: 1001;
-            box-shadow: inset -3px -3px 5px rgba(0, 0, 0, 0.2);
-            animation: balloon-float 8s linear forwards; /* Added animation properties */
-        }
-        
-        /* Balloon string pseudo-element */
-        .balloon::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 1px;
-            height: 15px;
-            background-color: currentColor; /* Use the balloon's color */
-        }
-
-        /* Balloon float animation: gentle float upwards and slight horizontal drift */
-        @keyframes balloon-float {
-            0% {
-                transform: translateY(0vh) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(5deg); /* Float out of view */
-                opacity: 0;
-            }
-        }
-        /* --- END NEW CELEBRATION CSS --- */
-
-
         /* --- NEW: Background Animation CSS (ENHANCED VISIBILITY) --- */
         #background-animation {
             position: fixed;
@@ -261,30 +196,29 @@
 
         .shard {
             position: absolute;
-            /* Enhanced visibility: bright white center with a strong cyan glow */
-            background: rgba(255, 255, 255, 0.95); 
-            box-shadow: 0 0 10px 4px rgba(103, 232, 249, 0.8); /* Stronger Icy blue glow */
+            background: rgba(255, 255, 255, 0.9); /* More opaque white */
+            box-shadow: 0 0 8px 3px rgba(103, 232, 249, 0.6); /* Icy blue glow */
             border-radius: 50%;
             opacity: 0;
-            animation: float 25s infinite ease-in-out alternate; 
+            animation: float 25s infinite ease-in-out alternate; /* Slightly longer animation */
         }
 
         @keyframes float {
             0% {
                 transform: translateY(0vh) translateX(0vw) rotate(0deg) scale(0.8);
-                opacity: 0.7; /* Increased opacity for better visibility */
+                opacity: 0.6; /* Increased opacity for better visibility */
             }
             30% {
                 transform: translateY(-20vh) translateX(10vw) rotate(120deg) scale(1.1);
-                opacity: 1; 
+                opacity: 0.9; 
             }
             60% {
                 transform: translateY(10vh) translateX(-15vw) rotate(240deg) scale(0.9);
-                opacity: 0.8; 
+                opacity: 0.7; 
             }
             100% {
                 transform: translateY(0vh) translateX(0vw) rotate(360deg) scale(0.8);
-                opacity: 0.7; /* Increased opacity for better visibility */
+                opacity: 0.6; /* Increased opacity for better visibility */
             }
         }
 
@@ -296,7 +230,7 @@
 
     <!-- Custom Message Box --><div id="custom-message"></div>
     
-    <!-- Celebration Effects Container (Was Fireworks Container) --><div id="fireworks-container"></div>
+    <!-- Fireworks Container --><div id="fireworks-container"></div>
 
     <!-- 1. LOGIN SCREEN --><!-- Added z-10 to ensure it is above the background animation (z-1) --><div id="login-screen" class="flex justify-center items-center min-h-screen w-full absolute top-0 left-0 bg-white/5 z-20 transition-opacity duration-500 z-10">
         <div class="glow-element rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl">
@@ -468,32 +402,6 @@
             }, 3000);
         }
 
-        // --- BACKGROUND ANIMATION LOGIC (Moved to before call) ---
-        function createBackgroundAnimation() {
-            const container = document.getElementById('background-animation');
-            const numShards = 15; // Number of floating diamond/shard particles
-
-            for (let i = 0; i < numShards; i++) {
-                const shard = document.createElement('div');
-                shard.className = 'shard';
-                
-                // Random size (10px to 30px)
-                const size = 10 + Math.random() * 20;
-                shard.style.width = `${size}px`;
-                shard.style.height = `${size}px`;
-
-                // Random starting position (top 10% to bottom 90% of screen)
-                shard.style.top = `${Math.random() * 80 + 10}vh`; 
-                shard.style.left = `${Math.random() * 100}vw`;
-
-                // Randomize animation delay and duration for variation
-                shard.style.animationDelay = `${Math.random() * 10}s`;
-                shard.style.animationDuration = `${15 + Math.random() * 15}s`;
-
-                container.appendChild(shard);
-            }
-        }
-        
         // --- UI TRANSITION ---
 
         function showApp() {
@@ -532,10 +440,7 @@
             const errorElement = document.getElementById("loginError");
             errorElement.textContent = message;
             errorElement.classList.remove('hidden');
-            // This is the persistent error for offline mode, don't hide it immediately
-            if (message !== "Database connection error. Voting is disabled. (Offline Mode)") {
-                setTimeout(() => { errorElement.classList.add('hidden'); }, 4000);
-            }
+            setTimeout(() => { errorElement.classList.add('hidden'); }, 4000);
         }
 
 
@@ -545,9 +450,12 @@
         async function setupFirebaseApp() {
             if (!isOnlineMode) {
                 // OFFLINE MODE: Skip Firebase initialization, but set the error message.
-                setLoginError("Database connection error. Voting is disabled. (Offline Mode)");
+                const loginError = document.getElementById("loginError");
+                loginError.textContent = "Database connection error. Voting is disabled. (Offline Mode)";
+                loginError.classList.remove('hidden');
                 document.getElementById("loginButton").disabled = true;
                 
+                // Set isAuthReady to true to allow the background animation to be called in the main loop
                 isAuthReady = true; 
                 renderCandidates();
                 setupRealtimeResults(); // Setup results in offline mode (will show 0 votes)
@@ -608,7 +516,6 @@
             
             // If offline, voting and admin are disabled
             if (!isOnlineMode) {
-                // The persistent error message should already be showing, just reinforce it.
                 return setLoginError("Voting is disabled because the database is offline.");
             }
 
@@ -686,13 +593,10 @@
             }
         }
 
-        // --- CELEBRATION EFFECTS LOGIC ---
-        const CELEBRATION_COLORS = ['#67e8f9', '#fca5a5', '#fcd34d', '#34d399', '#c084fc', '#ffffff'];
         const FIREWORK_COLORS = ['blue', 'red', 'yellow', 'green', 'purple'];
-        const CONTAINER_ID = 'fireworks-container'; // Use the same container for all effects
 
         function createFirework(x, y) {
-            const container = document.getElementById(CONTAINER_ID);
+            const container = document.getElementById('fireworks-container');
             const color = FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)];
             
             const fireworkElement = document.createElement('div');
@@ -706,92 +610,52 @@
                 fireworkElement.remove();
             }, 1500); // Matches animation duration
         }
-        
-        function createConfetti(x, y, color) {
-            const container = document.getElementById(CONTAINER_ID);
-            
-            const confettiElement = document.createElement('div');
-            confettiElement.className = `popper-confetti`;
-            confettiElement.style.backgroundColor = color;
-            confettiElement.style.left = `${x}px`;
-            confettiElement.style.top = `${y}px`;
-            
-            // Dynamic animation properties for blast variance
-            const angle = Math.random() * 360; // 0 to 360 degrees rotation
-            const distance = Math.random() * 50 + 50; // 50 to 100 pixels spread
-            const delay = Math.random() * 0.5; // 0 to 0.5s delay
-            
-            // Set 100% state for confetti-blast keyframe to scatter
-            confettiElement.style.animation = `confetti-blast 1.5s ease-out ${delay}s forwards`;
-            confettiElement.style.setProperty('--webkit-transform-end', `translateY(-${distance}px) translateX(${Math.cos(angle) * distance}px) rotate(${angle}deg) scale(0.5)`);
-            confettiElement.style.setProperty('transform', `translateY(-${distance}px) translateX(${Math.cos(angle) * distance}px) rotate(${angle}deg) scale(0.5)`);
 
-            container.appendChild(confettiElement);
+        function triggerFireworks() {
+            const container = document.getElementById('fireworks-container');
+            container.style.display = 'block'; // Show the container
 
-            setTimeout(() => {
-                confettiElement.remove();
-            }, 2000); // Animation duration plus cleanup time
-        }
-
-        function createBalloon(x, color, duration, size = 30) {
-            const container = document.getElementById(CONTAINER_ID);
-            
-            const balloonElement = document.createElement('div');
-            balloonElement.className = 'balloon';
-            balloonElement.style.backgroundColor = color;
-            balloonElement.style.left = `${x}px`;
-            balloonElement.style.width = `${size}px`;
-            balloonElement.style.height = `${size * 1.3}px`;
-            // Start position just below the screen (100% height)
-            balloonElement.style.top = `100%`; 
-            balloonElement.style.animationDuration = `${duration}s`;
-            balloonElement.style.animationDelay = `${Math.random() * 1.5}s`;
-            balloonElement.style.color = color; // For the pseudo-element string
-            
-            container.appendChild(balloonElement);
-
-            setTimeout(() => {
-                balloonElement.remove();
-            }, duration * 1000 + 2000); 
-        }
-
-        function triggerCelebrationEffects() {
-            const container = document.getElementById(CONTAINER_ID);
-            container.style.display = 'block';
-
-            // 1. Fireworks (Explode in random spots in the top 70%)
-            for (let i = 0; i < 10; i++) { 
+            // Trigger multiple fireworks
+            for (let i = 0; i < 10; i++) { // Blast 10 fireworks
                 const randomX = Math.random() * window.innerWidth;
-                const randomY = Math.random() * window.innerHeight * 0.7; 
+                const randomY = Math.random() * window.innerHeight * 0.7; // Keep them in upper 70% of screen
                 createFirework(randomX, randomY);
             }
-            
-            // 2. Confetti Poppers (Burst from the bottom 30% of the screen)
-            const numConfetti = 50;
-            const screenWidth = window.innerWidth;
-            const popperY = window.innerHeight * 0.95; // Just off the bottom edge
 
-            for (let i = 0; i < numConfetti; i++) {
-                const randomX = screenWidth * 0.4 + Math.random() * screenWidth * 0.2; // Confined to center 20%
-                const color = CELEBRATION_COLORS[Math.floor(Math.random() * CELEBRATION_COLORS.length)];
-                createConfetti(randomX, popperY, color);
-            }
-
-            // 3. Balloons (Float up from the bottom corners)
-            const colors = ['#fca5a5', '#60a5fa']; // Red and Blue
-            colors.forEach((color, index) => {
-                const startX = index === 0 ? window.innerWidth * 0.2 : window.innerWidth * 0.8;
-                const duration = 7 + Math.random() * 4; // 7 to 11 seconds float
-                createBalloon(startX, color, duration, 40); // 40px size
-            });
-
-            // Hide the container after effects are done (max duration is balloon float)
+            // Hide the container after the fireworks are done
             setTimeout(() => {
                 container.style.display = 'none';
-            }, 12000); 
+            }, 2000); // Display for 2 seconds
         }
 
-        // --- END CELEBRATION EFFECTS LOGIC ---
+        // NEW: Function to create and manage the subtle background animation
+        function createBackgroundAnimation() {
+            const container = document.getElementById('background-animation');
+            const numShards = 40; // Total number of particles
+
+            for (let i = 0; i < numShards; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'shard';
+                
+                // Random size (5px to 15px)
+                const size = Math.random() * 10 + 5; 
+                shard.style.width = `${size}px`;
+                shard.style.height = `${size}px`;
+
+                // Random starting position across the entire viewport
+                shard.style.left = `${Math.random() * 100}vw`;
+                shard.style.top = `${Math.random() * 100}vh`;
+
+                // Random animation duration (15s to 30s)
+                const duration = Math.random() * 15 + 15; 
+                shard.style.animationDuration = `${duration}s`;
+                
+                // Random animation delay (to spread out the starting positions)
+                shard.style.animationDelay = `-${Math.random() * duration}s`; 
+
+                container.appendChild(shard);
+            }
+        }
 
 
         async function handleVote(candidateName) {
@@ -859,8 +723,8 @@
                 // Show the new, exciting success message
                 showMessage(`🎉 VOTE SUCCESS! ${candidateName} IS COUNTED! 🚀`, false);
 
-                // Trigger fireworks, confetti, and balloons after successful vote
-                triggerCelebrationEffects();
+                // Trigger fireworks after successful vote
+                triggerFireworks();
 
             } catch (error) {
                 console.error("Voting failed:", error);
@@ -978,12 +842,13 @@
 
         // --- GLOBAL INITIALIZATION ---
         
-        // 1. Start the animation unconditionally (NOW SAFE to call)
+        // 1. Start the animation unconditionally (Fixes the animation issue)
         createBackgroundAnimation(); 
 
-        // 2. Start the application setup (which handles online/offline mode gracefully)
+        // 2. Start the application setup (which now handles online/offline mode gracefully)
         setupFirebaseApp();
         
     </script>
 </body>
 </html>
+
